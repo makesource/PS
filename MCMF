@@ -1,0 +1,54 @@
+struct MCMF{
+    int N,M;
+    vector<vector<int>> flow,cost,v;
+    vector<int> dist;
+    vector<int> in_que,parent;
+    
+    MCMF(){}
+    MCMF(int n,int m){
+        N=n; M=m;
+        v.resize(N+M+2);
+        dist.resize(N+M+2); in_que.resize(N+M+2); parent.resize(N+M+2);
+        FOR(i,0,N+M+2){
+            flow.push_back(dist);
+            cost.push_back(dist);
+        }
+    }
+    void add_edge(int a,int b,int c){
+        if (!flow[a][b] && !flow[b][a]) v[a].push_back(b), v[b].push_back(a);
+        flow[a][b]=1; cost[a][b]=c; cost[b][a]=-c;
+    }
+    void add_edge(int a,int b,int c,int f){
+        if (!flow[a][b] && !flow[b][a]) v[a].push_back(b), v[b].push_back(a);
+        flow[a][b]=f; cost[a][b]=c; cost[b][a]=-c;
+    }
+    bool SPFA(){
+        FOR(i,0,N+M+1) dist[i]=-INF, in_que[i]=parent[i]=0;
+        queue<int> q;
+        dist[0]=0; q.push(0); in_que[0]=1;
+        while(!q.empty()){
+            int a = q.front(); q.pop();
+            in_que[a]=0;
+            for (auto b : v[a]){
+                if (!flow[a][b]) continue;
+                if (dist[b] < dist[a]+cost[a][b]){
+                    dist[b] = dist[a]+cost[a][b];
+                    parent[b]=a;
+                    if (!in_que[b]) in_que[b]=1,q.push(b);
+                }
+            }
+        }
+        return dist[N+M+1] > -INF;
+    }
+    pair<int,int> get_MCMF(){
+        int ans=0,cnt=0;
+        FOR(i,1,N) add_edge(0, i, 0);
+        FOR(i,1,M) add_edge(N+i,N+M+1,0);
+        while (SPFA()){
+            cnt++;
+            ans += dist[N+M+1];
+            for (int i=N+M+1;i;i=parent[i]) flow[parent[i]][i]--, flow[i][parent[i]]++;
+        }
+        return make_pair(ans, cnt);
+    }
+};
