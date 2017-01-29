@@ -1,3 +1,2 @@
 # PS
-
-Library_Algorithm
+algorithm library for problem solving.
